@@ -23,7 +23,7 @@ int read_employees(int fd, struct dbheader_t *dbhdr, struct employee_t **employe
 
 }*/
 
-int output_file(int fd, struct dbheader_t *dbhdr/*, struct employee_t *employees*/) {
+int output_file(int fd, struct dbheader_t *dbhdr, struct employee_t *employees) {
     if (fd < 0) {
         printf("Bad file decriptor from user\n");
         return STATUS_ERROR;
@@ -100,7 +100,7 @@ int create_db_header(/*int fd,*/ struct dbheader_t **headerOut) {
     header->filesize = sizeof(struct dbheader_t);
 
     *headerOut = header;
-    return STATUS_SUCCESS;   
+    return STATUS_SUCCESS;
 }
 
 

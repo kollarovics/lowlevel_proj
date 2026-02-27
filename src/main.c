@@ -71,6 +71,6 @@ int main(int argc, char *argv[]) {
 
     printf("New file: %d\n", newFile);
     printf("Filepath: %s\n", filepath);
-    output_file(dbfd, header);
+    output_file(dbfd, header, NULL);
     return 0;
 }
