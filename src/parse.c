@@ -100,6 +100,7 @@ int create_db_header(/*int fd,*/ struct dbheader_t **headerOut) {
     header->filesize = sizeof(struct dbheader_t);
 
     *headerOut = header;
+    return STATUS_SUCCESS;   
 }
 
 
