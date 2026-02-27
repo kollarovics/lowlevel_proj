@@ -20,6 +20,7 @@ int main(int argc, char *argv[]) {
     bool newFile = false;
     char *filepath = NULL;
     int dbfd = -1;
+    struct dbheader_t *header = NULL;
 
     while ((currCase = getopt(argc, argv, "nf:")) != -1) {
         switch (currCase) {
@@ -50,10 +51,19 @@ int main(int argc, char *argv[]) {
             printf("Error creating database file\n");
             return STATUS_ERROR;
         }
+
+        if (create_db_header(dbfd, &header) == STATUS_ERROR) {
+            printf("Error creating database header\n");
+            return STATUS_ERROR;
+        }
     } else {
         dbfd = open_db_file(filepath);
         if (dbfd == STATUS_ERROR) {
             printf("Error opening database file\n");
+            return STATUS_ERROR;
+        }
+        if (validate_db_header(dbfd, &header) == STATUS_ERROR) {
+            printf("Error validating database header\n");
             return STATUS_ERROR;
         }
     }
@@ -61,5 +71,6 @@ int main(int argc, char *argv[]) {
 
     printf("New file: %d\n", newFile);
     printf("Filepath: %s\n", filepath);
+    output_file(dbfd, header);
     return 0;
 }
