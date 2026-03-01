@@ -14,14 +14,46 @@
 void list_employees(struct dbheader_t *dbhdr, struct employee_t *employees) {
 
 }
+*/
 
 int add_employee(struct dbheader_t *dbhdr, struct employee_t *employees, char *addstring) {
+    printf("Adding employee: %s\n", addstring);
+    char *name = strtok(addstring, ",");
+    char *address = strtok(NULL, ",");
+    char *hours = strtok(NULL, ",");
 
+    printf("Name: %s, Address: %s, Hours: %s\n", name, address, hours);
+
+    strncpy(employees[dbhdr->count-1].name, name, sizeof(employees[dbhdr->count-1].name));
+    strncpy(employees[dbhdr->count-1].address, address, sizeof(employees[dbhdr->count-1].address));
+
+    unsigned int hours_int = atoi(hours);
+    employees[dbhdr->count-1].hours = htonl(hours_int);
+
+    return STATUS_SUCCESS;
 }
 
-int read_employees(int fd, struct dbheader_t *dbhdr, struct employee_t **employeesOut) {
 
-}*/
+int read_employees(int fd, struct dbheader_t *dbhdr, struct employee_t **employeesOut) {
+    if (fd < 0) {
+        printf("Bad file decriptor from user\n");
+        return STATUS_ERROR;
+    }
+
+    int count = dbhdr->count;
+    struct employee_t *employees = calloc(count, sizeof(struct employee_t));
+    if (employees == NULL) {
+        printf("Error allocating memory\n");
+        return STATUS_ERROR;
+    }
+
+    read(fd, employees, count * sizeof(struct employee_t));
+    for (int i = 0; i < count; i++) {
+        employees[i].hours = ntohl(employees[i].hours);
+    }
+    *employeesOut = employees;
+    return STATUS_SUCCESS;
+}
 
 int output_file(int fd, struct dbheader_t *dbhdr, struct employee_t *employees) {
     if (fd < 0) {
@@ -29,13 +61,20 @@ int output_file(int fd, struct dbheader_t *dbhdr, struct employee_t *employees) 
         return STATUS_ERROR;
     }
 
+    int realcount = dbhdr->count;
+
     dbhdr->count = htons(dbhdr->count);
-    dbhdr->filesize = htonl(dbhdr->filesize);
+    dbhdr->filesize = htonl(sizeof(struct dbheader_t) + realcount * sizeof(struct employee_t));
     dbhdr->magic = htonl(dbhdr->magic);
     dbhdr->version = htons(dbhdr->version);
 
     lseek(fd, 0, SEEK_SET);
     write(fd, dbhdr, sizeof(struct dbheader_t));
+
+    for (int i = 0; i < realcount; i++) {
+        employees[i].hours = htonl(employees[i].hours);
+        write(fd, &employees[i], sizeof(struct employee_t));
+    }
 
     return STATUS_SUCCESS;
 }	
