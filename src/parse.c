@@ -48,7 +48,7 @@ int add_employee(struct dbheader_t *dbhdr, struct employee_t **employees, char *
     strncpy(e[dbhdr->count-1].address, address, sizeof(e[dbhdr->count-1].address)-1);
 
     unsigned int hours_int = atoi(hours);
-    e[dbhdr->count-1].hours = htonl(hours_int);
+    //e[dbhdr->count-1].hours = htonl(hours_int);
 
     *employees = e;
     return STATUS_SUCCESS;
