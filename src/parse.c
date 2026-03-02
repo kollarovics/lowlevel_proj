@@ -16,20 +16,41 @@ void list_employees(struct dbheader_t *dbhdr, struct employee_t *employees) {
 }
 */
 
-int add_employee(struct dbheader_t *dbhdr, struct employee_t *employees, char *addstring) {
+int add_employee(struct dbheader_t *dbhdr, struct employee_t **employees, char *addstring) {
+    if (NULL == dbhdr || NULL == *employees || NULL == employees || NULL == addstring) {
+        return STATUS_ERROR;
+    }
+
     printf("Adding employee: %s\n", addstring);
     char *name = strtok(addstring, ",");
+    if (NULL == name) {
+       return STATUS_ERROR;
+    }
     char *address = strtok(NULL, ",");
+    if (NULL == address) {
+       return STATUS_ERROR;
+    }
     char *hours = strtok(NULL, ",");
+    if (NULL == hours) {
+         return STATUS_ERROR;
+    }
 
     printf("Name: %s, Address: %s, Hours: %s\n", name, address, hours);
+    struct employee_t *e = *employees;
+    e = realloc(*employees, (dbhdr->count + 1) * sizeof(struct employee_t));
+    if (e == NULL) {
+        printf("Error reallocating memory\n");
+        return STATUS_ERROR;
+    }
+    dbhdr->count++;
 
-    strncpy(employees[dbhdr->count-1].name, name, sizeof(employees[dbhdr->count-1].name));
-    strncpy(employees[dbhdr->count-1].address, address, sizeof(employees[dbhdr->count-1].address));
+    strncpy(e[dbhdr->count-1].name, name, sizeof(e[dbhdr->count-1].name)-1);
+    strncpy(e[dbhdr->count-1].address, address, sizeof(e[dbhdr->count-1].address)-1);
 
     unsigned int hours_int = atoi(hours);
-    employees[dbhdr->count-1].hours = htonl(hours_int);
+    e[dbhdr->count-1].hours = htonl(hours_int);
 
+    *employees = e;
     return STATUS_SUCCESS;
 }
 

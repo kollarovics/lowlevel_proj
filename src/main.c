@@ -13,6 +13,8 @@ void print_usage(char *argv[]) {
     printf("Options:\n");
     printf("\t  -n: Create a new database file\n");
     printf("\t  -f: Specify the filepath to use\n");
+    printf("\t  -a: Add an employee to the database\n");
+    printf("\t  -l: List all employees in the database\n");
 }
 
 int main(int argc, char *argv[]) {
@@ -25,7 +27,7 @@ int main(int argc, char *argv[]) {
     char* addstring = NULL;
 
 
-    while ((currCase = getopt(argc, argv, "nf:a:")) != -1) {
+    while ((currCase = getopt(argc, argv, "nf:a:l")) != -1) {
         switch (currCase) {
             case 'n':
                 newFile = true;
@@ -82,9 +84,7 @@ int main(int argc, char *argv[]) {
     }
 
     if (addstring != NULL) {
-        header->count++;
-        realloc(employees, header->count * sizeof(struct employee_t));
-        add_employee(header, employees, addstring);
+        add_employee(header, &employees, addstring);
     }
 
     output_file(dbfd, header, employees);
