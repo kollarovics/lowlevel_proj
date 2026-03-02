@@ -84,7 +84,10 @@ int main(int argc, char *argv[]) {
     }
 
     if (addstring != NULL) {
-        add_employee(header, &employees, addstring);
+        if (add_employee(header, &employees, addstring) == STATUS_ERROR) {
+            printf("Error adding employee\n");
+            return STATUS_ERROR;
+        }
     }
 
     output_file(dbfd, header, employees);
