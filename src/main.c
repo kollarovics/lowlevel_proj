@@ -25,6 +25,7 @@ int main(int argc, char *argv[]) {
     struct dbheader_t *header = NULL;
     struct employee_t *employees = NULL;
     char* addstring = NULL;
+    bool list = false;
 
 
     while ((currCase = getopt(argc, argv, "nf:a:l")) != -1) {
@@ -37,6 +38,8 @@ int main(int argc, char *argv[]) {
                 break;
             case 'a':
                 addstring = optarg;
+            case 'l':
+                list = true;
             case '?':
                 printf("Unknown option: %c\n", optopt);
                 break;
@@ -86,9 +89,13 @@ int main(int argc, char *argv[]) {
     if (addstring != NULL) {
         if (add_employee(header, &employees, addstring) == STATUS_ERROR) {
             printf("Error adding employee\n");
-            return STATUS_ERROR;
+            //return STATUS_ERROR;
         }
     }
+
+    if (list) {
+        list_employees(header, employees);
+	}
 
     output_file(dbfd, header, employees);
     return 0;
