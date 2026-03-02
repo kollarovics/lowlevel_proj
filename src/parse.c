@@ -15,7 +15,7 @@ void list_employees(struct dbheader_t *dbhdr, struct employee_t *employees) {
 }
 
 int add_employee(struct dbheader_t *dbhdr, struct employee_t **employees, char *addstring) {
-    if (NULL == dbhdr || NULL == *employees || NULL == employees || NULL == addstring) {
+    if (NULL == dbhdr || NULL == employees || NULL == *employees || NULL == addstring) {
         return STATUS_ERROR;
     }
 
