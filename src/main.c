@@ -38,8 +38,10 @@ int main(int argc, char *argv[]) {
                 break;
             case 'a':
                 addstring = optarg;
+                break;
             case 'l':
                 list = true;
+                break;
             case '?':
                 printf("Unknown option: %c\n", optopt);
                 break;
