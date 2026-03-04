@@ -1,0 +1,30 @@
+//
+// Created by adrian on 3/4/26.
+//
+
+#ifndef LOWLEVEL_PROJ_SRVPOLL_H
+#define LOWLEVEL_PROJ_SRVPOLL_H
+
+#include <poll.h>
+
+#define MAX_CLIENTS 256
+#define PORT 8080
+#define BUFF_SIZE 4096
+
+typedef enum {
+    STATE_NEW,
+    STATE_CONNECTED,
+    STATE_DISCONNECTED
+} state_e;
+
+typedef struct {
+    int fd;
+    state_e state;
+    char buff[BUFF_SIZE];
+} clientstate_t;
+
+int init_clients(clientstate_t *states);
+int find_free_slot(clientstate_t *states);
+int find_slot_by_fd(clientstate_t *states, int fd);
+
+#endif //LOWLEVEL_PROJ_SRVPOLL_H

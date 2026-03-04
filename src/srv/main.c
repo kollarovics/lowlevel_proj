@@ -7,14 +7,18 @@
 #include "common.h"
 #include "file.h"
 #include "parse.h"
+#include "srvpoll.h"
 
 void print_usage(char *argv[]) {
-    printf("Usage: %s [-n] [-f filepath]\n", argv[0]);
+    printf("Usage: %s [-n] [-f filepath] -p [port number]\n", argv[0]);
     printf("Options:\n");
     printf("\t  -n: Create a new database file\n");
     printf("\t  -f: Specify the filepath to use\n");
-    printf("\t  -a: Add an employee to the database\n");
-    printf("\t  -l: List all employees in the database\n");
+    printf("\t  -p: Specify port to listen to\n");
+}
+
+void poll_loop(int port, struct dbheader_t *header, struct employee_t *employees) {
+
 }
 
 int main(int argc, char *argv[]) {
@@ -24,11 +28,11 @@ int main(int argc, char *argv[]) {
     int dbfd = -1;
     struct dbheader_t *header = NULL;
     struct employee_t *employees = NULL;
-    char* addstring = NULL;
-    bool list = false;
+    char *portarg = NULL;
+    unsigned short port = 0;
 
 
-    while ((currCase = getopt(argc, argv, "nf:a:l")) != -1) {
+    while ((currCase = getopt(argc, argv, "nf:p:")) != -1) {
         switch (currCase) {
             case 'n':
                 newFile = true;
@@ -36,11 +40,12 @@ int main(int argc, char *argv[]) {
             case 'f':
                 filepath = optarg;
                 break;
-            case 'a':
-                addstring = optarg;
-                break;
-            case 'l':
-                list = true;
+            case 'p':
+                portarg = optarg;
+                port = atoi(portarg);
+                if (port == 0) {
+                    printf("Invalid port number: %s\n", portarg);
+                }
                 break;
             case '?':
                 printf("Unknown option: %c\n", optopt);
@@ -52,6 +57,12 @@ int main(int argc, char *argv[]) {
 
     if (filepath == NULL) {
         printf("No filepath specified\n");
+        print_usage(argv);
+        return STATUS_SUCCESS;
+    }
+
+    if (port == 0) {
+        printf("No port specified\n");
         print_usage(argv);
         return STATUS_SUCCESS;
     }
@@ -80,24 +91,12 @@ int main(int argc, char *argv[]) {
         }
     }
 
-
-    printf("New file: %d\n", newFile);
-    printf("Filepath: %s\n", filepath);
     if (read_employees(dbfd, header, &employees) != STATUS_SUCCESS) {
            printf("Error reading employees\n");
            return STATUS_ERROR;
     }
 
-    if (addstring != NULL) {
-        if (add_employee(header, &employees, addstring) == STATUS_ERROR) {
-            printf("Error adding employee\n");
-            //return STATUS_ERROR;
-        }
-    }
-
-    if (list) {
-        list_employees(header, employees);
-	}
+    poll_loop(port, header, employees);
 
     output_file(dbfd, header, employees);
     return 0;
