@@ -8,13 +8,13 @@ struct dbheader_t {
 	unsigned short version;
 	unsigned short count;
 	unsigned int filesize;
-};
+} ;
 
 struct employee_t {
 	char name[256];
 	char address[256];
 	unsigned int hours;
-};
+} ;
 
 int create_db_header(/*int fd, */struct dbheader_t **headerOut);
 int validate_db_header(int fd, struct dbheader_t **headerOut);

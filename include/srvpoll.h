@@ -5,7 +5,11 @@
 #ifndef LOWLEVEL_PROJ_SRVPOLL_H
 #define LOWLEVEL_PROJ_SRVPOLL_H
 
+
 #include <poll.h>
+
+#include "common.h"
+#include "parse.h"
 
 #define MAX_CLIENTS 256
 #define PORT 8080
@@ -14,7 +18,10 @@
 typedef enum {
     STATE_NEW,
     STATE_CONNECTED,
-    STATE_DISCONNECTED
+    STATE_DISCONNECTED,
+    STATE_HELLO,
+    STATE_MSG,
+    STATE_GOODBYE,
 } state_e;
 
 typedef struct {
@@ -23,8 +30,13 @@ typedef struct {
     char buff[BUFF_SIZE];
 } clientstate_t;
 
-int init_clients(clientstate_t *states);
+
+
+
+
+void init_clients(clientstate_t *states);
 int find_free_slot(clientstate_t *states);
 int find_slot_by_fd(clientstate_t *states, int fd);
+void handle_client_fsm(struct dbheader_t *header, struct employee_t *employees, clientstate_t *client);
 
 #endif //LOWLEVEL_PROJ_SRVPOLL_H

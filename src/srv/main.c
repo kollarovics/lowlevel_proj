@@ -18,6 +18,10 @@ void print_usage(char *argv[]) {
 }
 
 void poll_loop(int port, struct dbheader_t *header, struct employee_t *employees) {
+    int listen_fd, conn_fd, freeSlot;
+   // struct sockaddr_in server_addr, client_addr;
+    //socklen_t client_addr_len = sizeof(client_addr);
+
 
 }
 
