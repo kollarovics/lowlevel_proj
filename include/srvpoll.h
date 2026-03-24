@@ -31,9 +31,6 @@ typedef struct {
 } clientstate_t;
 
 
-
-
-
 void init_clients(clientstate_t *states);
 int find_free_slot(clientstate_t *states);
 int find_slot_by_fd(clientstate_t *states, int fd);
