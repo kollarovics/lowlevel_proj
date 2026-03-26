@@ -9,6 +9,7 @@ OBJ_CLI = $(SRC_CLI:src/cli/%.c=obj/cli/%.o)
 
 run: clean default
 #	./$(TARGET_SRV) -f ./mynewdb.db -n -p 8080 &
+#
 #	./$(TARGET_CLI) 127.0.0.1
 #	kill -9 $$(pidof dbserver)
 

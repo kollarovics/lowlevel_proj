@@ -2,7 +2,6 @@
 #include <stdbool.h>
 #include <getopt.h>
 #include <stdlib.h>
-#include <getopt.h>
 #include <unistd.h>
 #include <string.h>
 #include <sys/socket.h>
@@ -15,7 +14,7 @@
 #include "parse.h"
 #include "srvpoll.h"
 
-clientstate_t states[MAX_CLIENTS];
+clientstate_t states[MAX_CLIENTS] = {0};
 
 void print_usage(char *argv[]) {
     printf("Usage: %s [-n] [-f filepath] -p [port number]\n", argv[0]);
@@ -36,15 +35,15 @@ void poll_loop(int port, struct dbheader_t *header, struct employee_t *employees
 
     init_clients(states);
 
-    if (listen_fd = socket(AF_INET, SOCK_STREAM, 0) == -1) {
+    if ((listen_fd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
         perror("socket");
         exit(EXIT_FAILURE);
     }
 
-    if (setsockopt(listen_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1) {
-        perror("setsockopt");
-        exit(EXIT_FAILURE);
-    }
+        if (setsockopt(listen_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1) {
+            perror("setsockopt");
+            exit(EXIT_FAILURE);
+        }
 
     memset(&server_addr, 0, sizeof(server_addr));
     server_addr.sin_family = AF_INET;
@@ -101,7 +100,7 @@ void poll_loop(int port, struct dbheader_t *header, struct employee_t *employees
 					close(conn_fd);
               } else {
                     states[freeSlot].fd = conn_fd;
-                    states[freeSlot].state = STATE_CONNECTED;
+                    states[freeSlot].state = STATE_HELLO;
 					nfds++;
                     printf("Slot %d has fd %d\n", freeSlot, states[freeSlot].fd);
               }
@@ -113,20 +112,22 @@ void poll_loop(int port, struct dbheader_t *header, struct employee_t *employees
                   n_events--;
                   int fd = fds[i].fd;
                   int slot = find_slot_by_fd(states, fd);
+                  printf("Got slot %d for fd %d\n", slot, fd);
                   ssize_t bytes_read = read(fd, &states[slot].buff, sizeof(states[slot].buff));
                   if (bytes_read <= 0) {
                       close(fd);
-                      if (slot != -1) {
+                      if (slot == -1) {
                          printf("Tried to close slot that does not exists\n");
                       } else {
                          states[slot].fd = -1;
                          states[slot].state = STATE_DISCONNECTED;
-                         printf("Connection closed on error\n");
+                         printf("Connection closed...\n");
                          nfds--;
                       }
 
                   } else {
-                      printf("Received %d bytes from client: %s\n", bytes_read, states[slot].buff);
+                      //printf("Received %d bytes from client: %s\n", bytes_read, states[slot].buff);
+                      handle_client_fsm(header, employees, &states[slot]);
                   }
               }
           }
