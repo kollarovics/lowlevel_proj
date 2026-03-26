@@ -1,13 +1,10 @@
 #include <stdio.h>
-#include <stdbool.h>
-#include <getopt.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
-#include <sys/time.h>
 
 #include "common.h"
 #include "file.h"
@@ -24,7 +21,7 @@ void print_usage(char *argv[]) {
     printf("\t  -p: Specify port to listen to\n");
 }
 
-void poll_loop(int port, struct dbheader_t *header, struct employee_t *employees) {
+void poll_loop(int port, struct dbheader_t *header, struct employee_t *employees, int dbfd) {
     int listen_fd, conn_fd, freeSlot;
     struct sockaddr_in server_addr, client_addr;
     socklen_t client_addr_len = sizeof(client_addr);
@@ -126,8 +123,12 @@ void poll_loop(int port, struct dbheader_t *header, struct employee_t *employees
                       }
 
                   } else {
-                      //printf("Received %d bytes from client: %s\n", bytes_read, states[slot].buff);
-                      handle_client_fsm(header, employees, &states[slot]);
+                      // printf("Received %zd bytes:\n", bytes_read);
+                      // for (ssize_t i = 0; i < bytes_read; i++) {
+                      //     printf("%02X ", (unsigned char)states[slot].buff[i]);
+                      // }
+                      // printf("\n");
+                      handle_client_fsm(header, &employees, &states[slot], dbfd);
                   }
               }
           }
@@ -210,7 +211,7 @@ int main(int argc, char *argv[]) {
            return STATUS_ERROR;
     }
 
-    poll_loop(port, header, employees);
+    poll_loop(port, header, employees, dbfd);
 
     output_file(dbfd, header, employees);
     return 0;

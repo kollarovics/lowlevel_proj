@@ -43,13 +43,14 @@ int add_employee(struct dbheader_t *dbhdr, struct employee_t **employees, char *
     }
 
     printf("Name: %s, Address: %s, Hours: %s\n", name, address, hours);
+    dbhdr->count++;
+
+    *employees = realloc(*employees, (dbhdr->count + 1) * sizeof(struct employee_t));
     struct employee_t *e = *employees;
-    e = realloc(*employees, (dbhdr->count + 1) * sizeof(struct employee_t));
     if (e == NULL) {
         printf("Error reallocating memory\n");
         return STATUS_ERROR;
     }
-    dbhdr->count++;
 
     strncpy(e[dbhdr->count-1].name, name, sizeof(e[dbhdr->count-1].name)-1);
     strncpy(e[dbhdr->count-1].address, address, sizeof(e[dbhdr->count-1].address)-1);
@@ -82,10 +83,10 @@ int read_employees(int fd, struct dbheader_t *dbhdr, struct employee_t **employe
     return STATUS_SUCCESS;
 }
 
-int output_file(int fd, struct dbheader_t *dbhdr, struct employee_t *employees) {
+void output_file(int fd, struct dbheader_t *dbhdr, struct employee_t *employees) {
     if (fd < 0) {
         printf("Bad file decriptor from user\n");
-        return STATUS_ERROR;
+        return /*STATUS_ERROR*/;
     }
 
     int realcount = dbhdr->count;
@@ -101,9 +102,16 @@ int output_file(int fd, struct dbheader_t *dbhdr, struct employee_t *employees) 
     for (int i = 0; i < realcount; i++) {
         employees[i].hours = htonl(employees[i].hours);
         write(fd, &employees[i], sizeof(struct employee_t));
+        employees[i].hours = ntohl(employees[i].hours);
     }
 
-    return STATUS_SUCCESS;
+    dbhdr->count = ntohs(dbhdr->count);
+    dbhdr->filesize = ntohl(sizeof(struct dbheader_t) + realcount * sizeof(struct employee_t));
+    dbhdr->magic = ntohl(dbhdr->magic);
+    dbhdr->version = ntohs(dbhdr->version);
+
+
+    //return STATUS_SUCCESS;
 }	
 
 int validate_db_header(int fd, struct dbheader_t **headerOut) {
